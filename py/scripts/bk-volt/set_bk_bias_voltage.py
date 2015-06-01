@@ -1,9 +1,10 @@
 #!/bin/python
-
 import sys
-import slow_control
+from muonlab.device import BKPrecision
 
-usage_warning = "Usage: \npython set_bias_voltage.py <voltage> <device_path1> <(opt)device_path2>"
+usage_warning = """
+Usage: \npython set_bias_voltage.py <voltage> <device_path1> [<device_path2>]
+"""
 
 # Check for the right number of arguments
 if (len(sys.argv) < 3):
@@ -15,12 +16,12 @@ try:
 
 except:
     print usage_warning
-    
+
 
 # Change voltages
 for i in range(2, len(sys.argv)):
 
-    bk = slow_control.BKPrecision(sys.argv[i])
+    bk = BKPrecision(sys.argv[i])
     last_volt = bk.meas_volt()
     bk.set_volt(volt)
     print sys.argv[i] + ' voltage was ' + str(last_volt) + 'V.'

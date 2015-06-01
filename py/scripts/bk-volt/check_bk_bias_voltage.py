@@ -1,9 +1,10 @@
 #!/bin/python
 
 import sys
-import slow_control
+from muonlab.devices import BKPrecision
 
-usage_warning = "Usage: \npython check_bias_voltage.py <device_path1> <(opt)device_path2>"
+usage_warning = """
+Usage: \npython check_bias_voltage.py <device_path1> [<device_path2>]"""
 
 # Check for the right number of arguments
 if (len(sys.argv) < 2):
@@ -13,8 +14,8 @@ if (len(sys.argv) < 2):
 # Check voltages
 for i in range(1, len(sys.argv)):
 
-    bk = slow_control.BKPrecision(sys.argv[i])
-    
+    bk = BKPrecision(sys.argv[i])
+
     print ""
 
     print sys.argv[i] + ' voltage: ' + str(bk.meas_volt())
@@ -26,4 +27,3 @@ for i in range(1, len(sys.argv)):
         print sys.argv[i] + ' is connected to the black wrapped crystals.'
 
     print ""
-

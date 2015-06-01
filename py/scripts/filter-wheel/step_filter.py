@@ -1,12 +1,4 @@
-import u3
-import time
+from muonlab.device import FilterWheel
 
-d = u3.U3()
-
-d.setDOState(10, 1)
-
-time.sleep(0.5)
-
-d.setDOState(10, 0)
-
-
+fw = FilterWheel()
+fw.step_wheel()
