@@ -5,5 +5,5 @@ setup(
     version='0.2.0',
     author='Matthias W. Smith',
     email='mwmsith2@uw.edu',
-    py_modules=['slow_control'],
+    packages=['muonlab'],
 )
