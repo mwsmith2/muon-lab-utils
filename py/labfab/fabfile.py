@@ -12,6 +12,11 @@ def host_type():
 
 
 @roles('uwlab')
+def arch_type():
+    run('uname -a')
+
+
+@roles('uwlab')
 def mkdir(path):
     run('mkdir ' + path)
 
@@ -30,3 +35,7 @@ def gitclone(url):
     run('mkdir -p ~/Packages')
     run('cd ~/Packages')
     run('git clone %s' % (url))
+
+
+def install(pkg):
+    run('ls')
