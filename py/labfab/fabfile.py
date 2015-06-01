@@ -35,7 +35,3 @@ def gitclone(url):
     run('mkdir -p ~/Packages')
     with cd('~/Packages'):
         run('git clone %s' % (url))
-
-
-def install(pkg):
-    run('ls')
