@@ -3,9 +3,14 @@ import serial
 import u3
 import urllib2 as url
 from urllib import quote
+import json
+import time
+
+# Global variable dict
+g = {'conf_file': '~/.labconf/labjackconf.json'}
 
 
-class BKPrecision:
+class BKPrecision(object):
 
     def __init__(self, dev_path, baud=4800, timeout=1):
         self.s = serial.Serial(dev_path, baud, timeout=timeout)
@@ -48,7 +53,7 @@ class BKPrecision:
         self.s.write('SOUR:CURR ' + str(new_curr) + '\n')
 
 
-class Mover:
+class Mover(object):
 
     def __init__(self, dev_path, baud_rate=9600, timeout=1):
         self.s = serial.Serial(dev_path)
@@ -80,7 +85,7 @@ class Mover:
         self.move_y(-self.ynet)
 
 
-class TempProbe:
+class TempProbe(object):
 
     def __init__(self, default_probe=1):
         self.d = u3.U3()
@@ -137,7 +142,7 @@ class TempProbe:
         return temp
 
 
-class UvaBias:
+class UvaBias(object):
     """A class to interface with the UVa/JMU bias supply.  It talks
     serially over ethernet.
     """
@@ -277,3 +282,81 @@ class UvaBias:
     def _open_url(self, url_path, args):
         """A wrapper function for the url calls."""
         return url.urlopen(url_path + quote(args)).read()
+
+
+class Laser(object):
+    """The class uses labjack to control the laser settings"""
+    def __init__(self):
+        self.conf = json.load(open(g['conf_file']))
+
+    def off(self):
+        """Stop firing the laser."""
+        d = u3.U3()
+        d.setDOState(self.conf['laser.slow_enable'], 0)
+        d.setDOState(self.conf['laser.fast_enable'], 0)
+
+    def on_slow(self):
+        """Begin firing the laser slowly."""
+        d = u3.U3()
+        d.setDOState(self.conf['laser.slow_enable'], 1)
+        d.setDOState(self.conf['laser.fast_enable'], 0)
+
+    def on_fast(self):
+        """Begin firing the laser quickly."""
+        d = u3.U3()
+        d.setDOState(self.conf['laser.slow_enable'], 0)
+        d.setDOState(self.conf['laser.fast_enable'], 1)
+
+
+class FilterWheel(object):
+    """The classes uses labjack to step the filter wheel."""
+    def __init__(self):
+        conf = json.load(open(g['conf_file']))
+        self.step_pin = conf['filter_wheel.step_pin']
+        self.total_steps = 6
+
+    def step_wheel(self):
+        d = u3.U3()
+        d.setDOState(self.step_pin, 1)
+        time.sleep(0.25)
+        d.setDOState(self.step_pin, 0)
+        self._increment_wheel_pos()
+
+    def goto_pos(self, pos):
+        """Step the wheel until it is at the specified position."""
+        try:
+            pos = int(pos)
+        except:
+            print "Argument not convertible to integer."
+            return
+
+        conf = json.load(open(g['conf_file']))
+        numsteps = pos - conf['filter_wheel.current_pos']
+
+        if (numsteps < 0):
+            numsteps += self.total_steps
+
+        for i in xrange(numsteps):
+            self.step_wheel()
+
+    def set_wheel_pos(self, pos):
+        """Set the position to an absolute step number."""
+        try:
+            int(pos)
+        except:
+            print "Argument not convertible to integer."
+            return
+
+        conf = json.load(open(g['conf_file']))
+        conf['filter_wheel.current_pos'] = int(pos)
+        json.dump(conf, open(g['conf_file']))
+
+    def _increment_wheel_pos(self):
+        """Increment the step position in the config file."""
+        conf = json.load(open(g['conf_file']))
+        conf['filter_wheel.current_pos'] += 1
+
+        if conf['filter_wheel.current_pos'] > 6:
+            conf['filter_wheel.current_pos'] = 1
+
+        json.dump(conf, open(g['conf_file']))

@@ -1,4 +1,4 @@
-from fabric.api import run, env, roles
+from fabric.api import run, env, roles, cd
 
 env.use_ssh_config = True
 env.roledefs['uwlab'] = ['musun2', 'nmr-daq', 'nmr-cave']
@@ -33,8 +33,8 @@ def ln(path1, path2):
 
 def gitclone(url):
     run('mkdir -p ~/Packages')
-    run('cd ~/Packages')
-    run('git clone %s' % (url))
+    with cd('~/Packages'):
+        run('git clone %s' % (url))
 
 
 def install(pkg):
