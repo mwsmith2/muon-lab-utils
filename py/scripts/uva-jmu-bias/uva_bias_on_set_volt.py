@@ -1,7 +1,8 @@
 #!/bin/python
 
-import slow_control as sc
-import sys, json, os
+import sys
+import json
+from muonlab.device import UvaBias
 
 # Get the curren bias configuration.
 if (len(sys.argv) > 1):
@@ -9,7 +10,7 @@ if (len(sys.argv) > 1):
 
 else:
     config_file = 'uva_bias_voltages.json'
-    
+
 # Open the json file.
 conf = json.load(open(config_file))
 
@@ -17,16 +18,15 @@ conf = json.load(open(config_file))
 voltages = []
 
 for x in conf['voltages']:
-	for val in x:
-	    voltages.append(val)
+    for val in x:
+        voltages.append(val)
 
 # Turn on and set the voltages.
-hv = sc.UvaBias('http://192.168.1.50')
-
+hv = UvaBias('http://192.168.1.50')
 hv.bias_on()
 
 for i in range(hv.num_channels):
-	hv.set_channel(i + 1, voltages[i])
+    hv.set_channel(i + 1, voltages[i])
 
 # Read out the voltages to make sure they were set
 hv.read_all_channels()
